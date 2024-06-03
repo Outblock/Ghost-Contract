@@ -1,4 +1,3 @@
-#allowAccountLinking
 import Crypto
 
 transaction(publicKey: String, signatureAlgorithm: UInt8, hashAlgorithm: UInt8, weight: UFix64) {

@@ -21,8 +21,8 @@ transaction(owner: Address, publicKey: String, signatureAlgorithm: UInt8, hashAl
         let authRecorderRef = ownerAcc.capabilities.borrow<&GhostAccount.AuthRecorder>(GhostAccount.GhostAccountPublicPath) ?? panic("Could not borrow owner reference to the recipient's Auth recorder") 
 
         let accountKeyCap = account.capabilities.account.issue<auth(Keys) &Account>()
+        
         authRecorderRef.grantAuth(accountKeyCap)
-
     }
 
 }
