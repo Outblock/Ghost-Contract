@@ -11,7 +11,6 @@ access(all) contract GhostAccount {
 
   access(all) resource interface IdentityCertificate {}
 
-  access(all) let authsMapping: {Address: [Address]}
 
   access(all) entitlement Owner
 
@@ -29,7 +28,6 @@ access(all) contract GhostAccount {
     self.GhostAccountPublicPath = /public/ghostAccountRecorder
     self.GhostAccountStoragePath = /storage/ghostAccountRecorder
     self.GhostAccountIdentityCertificatePath = /storage/ghostAccountIdentityCertificate
-    self.authsMapping = {}
 
     let account = self.account
     let recorder <- create AuthRecorder()
@@ -55,7 +53,7 @@ access(all) contract GhostAccount {
       return self.ownedAccounts.containsKey(address)
     }
 
-    access(all) fun grantAuth(_ authAccountCap: Capability<auth(Keys) &Account>) {
+    access(GhostAccount.Owner) fun grantAuth(_ authAccountCap: Capability<auth(Keys) &Account>) {
       pre{
         self.hasAuth(address: authAccountCap!.address) == false : "Already granted"
         authAccountCap.borrow() != nil : "Account Cap can not be nil"
@@ -64,11 +62,6 @@ access(all) contract GhostAccount {
       let toAddr = self.owner!.address
       let authAddr = authAccountCap!.address
       self.ownedAccounts[authAddr] = authAccountCap
-      let authAddrs = GhostAccount.authsMapping[toAddr] ?? []
-      
-      authAddrs.append(authAddr)
-      GhostAccount.authsMapping[toAddr] = authAddrs
-      
       emit AuthGranted(address:authAddr, owner: self.owner!.address)
     }
 
@@ -102,28 +95,13 @@ access(all) contract GhostAccount {
       }
       let ownerAddr = self.owner!.address
       self.ownedAccounts.remove(key: addr)
-      let accts = GhostAccount.authsMapping[ownerAddr] ?? []
-      let idx = accts.firstIndex(of: addr)!
-      accts.remove(at: idx)
-      GhostAccount.authsMapping[ownerAddr] = accts
       emit AuthRevocked(address: addr, owner: ownerAddr)
       return true
     }
   }
-
-
-  access(all) view fun checkAuth(owner: Address, address: Address): Bool {
-    let ownedAccts = GhostAccount.authsMapping[owner] ?? []
-    return ownedAccts.contains(address)
-
-  }
   
   access(all) fun createAuthRecorder(): @AuthRecorder {
     return <- create AuthRecorder()
-  }
-
-  access(all) view fun getOwnedAccount(_ address: Address): [Address]? {
-    return self.authsMapping[address]
   }
 
 }

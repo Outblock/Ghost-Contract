@@ -1,0 +1,71 @@
+{
+  "contracts": {
+    "FlowToken": {
+      "source": "cadence/contracts/utility/FlowToken.cdc",
+      "aliases": {
+        "emulator": "0ae53cb6e3f42a79",
+        "testnet": "7e60df042a9c0868",
+        "mainnet": "1654653399040a61"
+      }
+    },
+    "FungibleToken": {
+      "source": "cadence/contracts/utility/FungibleToken.cdc",
+      "aliases": {
+        "emulator": "ee82856bf20e2aa6",
+        "testnet": "9a0766d93b6608b7",
+        "mainnet": "f233dcee88fe0abe"
+      }
+    },
+    "GhostAccount": {
+      "source": "cadence/contracts/GhostAccount.cdc",
+      "aliases": {
+        "emulator": "f8d6e0586b0a20c7",
+        "previewnet": "104505db008b54c9"
+      }
+    }
+  },
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000",
+    "previewnet": "access.previewnet.nodes.onflow.org:9000"
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "f8d6e0586b0a20c7",
+      "key": "6d12eebfef9866c9b6fa92b97c6e705c26a1785b1e7944da701fc545a51d4673"
+    },
+    "acc1": {
+      "address": "0x179b6b1cb6755e31",
+      "key": "f06f423a903c5beac745481b908a324f05016471eb7064bda13ad7ed7e87f5c5"
+    },
+    "acc2": {
+      "address": "0xf3fcd2c1a78f5eee",
+      "key": "f06f423a903c5beac745481b908a324f05016471eb7064bda13ad7ed7e87f5c5"
+    },
+    "preview": {
+      "address": "0x104505db008b54c9",
+      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
+    },
+    "test1": {
+      "address": "0x061160e8998f5ea8",
+      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
+    },
+    "test2": {
+      "address": "0xe276d93588755e77",
+      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "GhostAccount"
+      ]
+    },
+    "previewnet": {
+      "preview": [
+        "GhostAccount"
+      ]
+    }
+  }
+}
