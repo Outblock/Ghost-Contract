@@ -7,7 +7,9 @@ access(all) contract GhostAccount {
   access(all) let GhostAccountStoragePath: StoragePath
   access(all) let GhostAccountIdentityCertificatePath: StoragePath
   access(all) let GhostAccountPublicPath: PublicPath
-  access(all) let LinkedAccountPath: StoragePath
+  access(all) let GhostAccountAdminStoragePath: StoragePath
+  // access(all) let LinkedAccountPath: StoragePath
+  access(account) var authRecorderLimit: Int
 
   access(all) resource interface IdentityCertificate {}
 
@@ -15,26 +17,40 @@ access(all) contract GhostAccount {
   access(all) entitlement Owner
 
 
-
-
   access(all) event AuthGranted(address: Address, owner: Address)
   access(all) event AuthRevocked(address: Address, owner: Address)
 
 
   init(){
-    let identifier = "AuthRecovery_".concat(self.account.address.toString())
-    self.LinkedAccountPath = StoragePath(identifier: "LinkedAccountPrivatePath_".concat(identifier))!
+    // let identifier = "AuthRecovery_".concat(self.account.address.toString())
+    // self.LinkedAccountPath = StoragePath(identifier: "LinkedAccountPrivatePath_".concat(identifier))!
 
     self.GhostAccountPublicPath = /public/ghostAccountRecorder
+    
     self.GhostAccountStoragePath = /storage/ghostAccountRecorder
+    self.GhostAccountAdminStoragePath = /storage/ghostAccountAdminRecorder
     self.GhostAccountIdentityCertificatePath = /storage/ghostAccountIdentityCertificate
-
+    self.authRecorderLimit = 20
+      
     let account = self.account
     let recorder <- create AuthRecorder()
-      
+
+   
     self.account.storage.save(<-recorder, to: self.GhostAccountStoragePath)
+     self.account.storage.save(<- create Admin(), to: self.GhostAccountAdminStoragePath)
     let authRecorderCap: Capability<&GhostAccount.AuthRecorder> = self.account.capabilities.storage.issue<&GhostAccount.AuthRecorder>(self.GhostAccountStoragePath)
     self.account.capabilities.publish(authRecorderCap, at: self.GhostAccountPublicPath)
+  }
+
+  access(all) resource Admin {
+    
+    init () {
+      
+    }
+
+    access(GhostAccount.Owner) fun setGhostAccountAuthLimit(_ limit: Int) {
+      GhostAccount.authRecorderLimit = limit
+    }
   }
 
   access(all) resource AuthRecorder: IdentityCertificate {
@@ -57,6 +73,7 @@ access(all) contract GhostAccount {
       pre{
         self.hasAuth(address: authAccountCap!.address) == false : "Already granted"
         authAccountCap.borrow() != nil : "Account Cap can not be nil"
+        self.getOwnedAccount()!.length < GhostAccount.authRecorderLimit : "Can not exceed the limit of auth"
       }
       
       let toAddr = self.owner!.address

@@ -18,3 +18,8 @@ flow-c1 transactions send --network=emulator --gas-limit=9999 --signer=emulator-
 # flow-c1 transactions sign tx1 --signer acc1 --filter payload --save tx2
 # flow-c1 transactions sign tx2 --signer emulator-account --filter payload --save tx3
 # flow-c1 transactions send-signed tx3 --network=emulator
+
+
+# config
+
+# flow-c1 transactions send --network=emulator --gas-limit=9999 --signer=emulator-account ./cadence/transactions/set_auth_limit.cdc 3
