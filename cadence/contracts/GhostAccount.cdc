@@ -5,7 +5,6 @@ access(all) contract GhostAccount {
 
   // declaration of a public variable
   access(all) let GhostAccountStoragePath: StoragePath
-  access(all) let GhostAccountIdentityCertificatePath: StoragePath
   access(all) let GhostAccountPublicPath: PublicPath
   access(all) let GhostAccountAdminStoragePath: StoragePath
   // access(all) let LinkedAccountPath: StoragePath
@@ -29,7 +28,6 @@ access(all) contract GhostAccount {
     
     self.GhostAccountStoragePath = /storage/ghostAccountRecorder
     self.GhostAccountAdminStoragePath = /storage/ghostAccountAdminRecorder
-    self.GhostAccountIdentityCertificatePath = /storage/ghostAccountIdentityCertificate
     self.authRecorderLimit = 20
       
     let account = self.account

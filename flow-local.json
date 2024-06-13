@@ -42,18 +42,6 @@
     "acc2": {
       "address": "0xf3fcd2c1a78f5eee",
       "key": "f06f423a903c5beac745481b908a324f05016471eb7064bda13ad7ed7e87f5c5"
-    },
-    "preview": {
-      "address": "0x104505db008b54c9",
-      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
-    },
-    "test1": {
-      "address": "0x061160e8998f5ea8",
-      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
-    },
-    "test2": {
-      "address": "0xe276d93588755e77",
-      "key": "e9ff59416a93bc6052c1c9f06cf676abf4a6c29854a3c450f274c5797861de76"
     }
   },
   "deployments": {
