@@ -36,7 +36,6 @@ access(all) contract Switch {
   access(all) resource Admin {
     
     init () {
-      
     }
 
     access(Switch.Owner) fun setGracePeriod(_ period: UFix64) {

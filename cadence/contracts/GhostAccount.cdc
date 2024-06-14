@@ -2,57 +2,48 @@
 
 access(all) contract GhostAccount {
 
-
-  // declaration of a public variable
   access(all) let GhostAccountStoragePath: StoragePath
   access(all) let GhostAccountPublicPath: PublicPath
   access(all) let GhostAccountAdminStoragePath: StoragePath
-  // access(all) let LinkedAccountPath: StoragePath
+
+  // AuthRecorder limit 
   access(account) var authRecorderLimit: Int
 
-  access(all) resource interface IdentityCertificate {}
-
-
   access(all) entitlement Owner
-
 
   access(all) event AuthGranted(address: Address, owner: Address)
   access(all) event AuthRevocked(address: Address, owner: Address)
 
 
   init(){
-    // let identifier = "AuthRecovery_".concat(self.account.address.toString())
-    // self.LinkedAccountPath = StoragePath(identifier: "LinkedAccountPrivatePath_".concat(identifier))!
-
     self.GhostAccountPublicPath = /public/ghostAccountRecorder
-    
     self.GhostAccountStoragePath = /storage/ghostAccountRecorder
     self.GhostAccountAdminStoragePath = /storage/ghostAccountAdminRecorder
-    self.authRecorderLimit = 20
+    self.authRecorderLimit = 10
       
     let account = self.account
     let recorder <- create AuthRecorder()
 
-   
+
     self.account.storage.save(<-recorder, to: self.GhostAccountStoragePath)
-     self.account.storage.save(<- create Admin(), to: self.GhostAccountAdminStoragePath)
     let authRecorderCap: Capability<&GhostAccount.AuthRecorder> = self.account.capabilities.storage.issue<&GhostAccount.AuthRecorder>(self.GhostAccountStoragePath)
     self.account.capabilities.publish(authRecorderCap, at: self.GhostAccountPublicPath)
+
+    // create admin resource
+    self.account.storage.save(<- create Admin(), to: self.GhostAccountAdminStoragePath)
   }
 
   access(all) resource Admin {
-    
-    init () {
-      
-    }
+    init () {}
 
+    // change limit of AuthRecorder 
     access(GhostAccount.Owner) fun setGhostAccountAuthLimit(_ limit: Int) {
       GhostAccount.authRecorderLimit = limit
     }
   }
 
-  access(all) resource AuthRecorder: IdentityCertificate {
-
+  // For record the primary AuthAccount auth(Keys) in ownedAccounts
+  access(all) resource AuthRecorder {
     access(self) var ownedAccounts: {Address: Capability<auth(Keys) &Account>}
 
     init () {
@@ -67,6 +58,7 @@ access(all) contract GhostAccount {
       return self.ownedAccounts.containsKey(address)
     }
 
+    // Grant auth need multi-sig trx to add record on ownedAccounts
     access(GhostAccount.Owner) fun grantAuth(_ authAccountCap: Capability<auth(Keys) &Account>) {
       pre{
         self.hasAuth(address: authAccountCap!.address) == false : "Already granted"
@@ -80,7 +72,7 @@ access(all) contract GhostAccount {
       emit AuthGranted(address:authAddr, owner: self.owner!.address)
     }
 
-
+    // Get auth record to revoke key or add keys
     access(GhostAccount.Owner) fun getAuthAccount(_ addr: Address): auth(Keys) &Account {
       pre{
           self.ownedAccounts[addr] != nil : "cannot find authAccount"
@@ -89,6 +81,7 @@ access(all) contract GhostAccount {
       return authAcctCap.borrow()!
     }
 
+    // Add new key on owned AuthAccount
     access(GhostAccount.Owner) fun addKey(_ addr: Address, key: PublicKey, hashAlgorithm: HashAlgorithm, weight: UFix64) {
       pre{
           self.ownedAccounts[addr] != nil : "cannot find authAccount"
@@ -115,6 +108,7 @@ access(all) contract GhostAccount {
     }
   }
   
+  // create AuthRecorder for user who wants GhostAccount
   access(all) fun createAuthRecorder(): @AuthRecorder {
     return <- create AuthRecorder()
   }
