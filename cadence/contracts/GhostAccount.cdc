@@ -11,8 +11,7 @@ access(all) contract GhostAccount {
 
   access(all) entitlement Owner
 
-  access(all) event AuthGranted(address: Address, owner: Address)
-  access(all) event AuthRevocked(address: Address, owner: Address)
+  access(all) event AuthChanged(address: Address, owner: Address, granted: Bool)
 
 
   init(){
@@ -69,16 +68,17 @@ access(all) contract GhostAccount {
       let toAddr = self.owner!.address
       let authAddr = authAccountCap!.address
       self.ownedAccounts[authAddr] = authAccountCap
-      emit AuthGranted(address:authAddr, owner: self.owner!.address)
+      emit AuthChanged(address:authAddr, owner: self.owner!.address, granted: true)
     }
 
     // Get auth record to revoke key or add keys
-    access(GhostAccount.Owner) fun getAuthAccount(_ addr: Address): auth(Keys) &Account {
-      pre{
-          self.ownedAccounts[addr] != nil : "cannot find authAccount"
+    access(GhostAccount.Owner) fun getAuthAccount(_ addr: Address): auth(Keys) &Account? {
+      let authAcctCap: Capability<auth(Keys) &Account>? = self.ownedAccounts[addr]
+      if authAcctCap != nil {
+        return authAcctCap!.borrow()
+      } else {
+        return nil
       }
-      let authAcctCap: Capability<auth(Keys) &Account> = self.ownedAccounts[addr]!
-      return authAcctCap.borrow()!
     }
 
     // Add new key on owned AuthAccount
@@ -103,7 +103,7 @@ access(all) contract GhostAccount {
       }
       let ownerAddr = self.owner!.address
       self.ownedAccounts.remove(key: addr)
-      emit AuthRevocked(address: addr, owner: ownerAddr)
+      emit AuthChanged(address: addr, owner: ownerAddr, granted: false)
       return true
     }
   }
